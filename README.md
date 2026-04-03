@@ -6,7 +6,7 @@ A Claude Code skill that initializes new project repositories with standardized 
 
 - **CLAUDE.md** -- Project-specific instructions for Claude Code agents
 - **AGENTS.md** -- Coding standards, commands, and conventions
-- **DESIGN.md** -- Design system skeleton (flesh out with `/design-consultation`)
+- **DESIGN.md** -- Design system from [antidesign](https://github.com/anti-enterprises/antidesign) (54 curated brands) or skeleton
 - **.envrc** -- direnv config for GCP project isolation
 - **.mcp.json** -- claude-flow v3 MCP server configuration
 - **scripts/deploy.sh** -- Deploy script with GCP project guard

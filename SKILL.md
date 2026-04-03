@@ -1,6 +1,6 @@
 ---
 name: proj-init
-description: Initialize a new project with CLAUDE.md, AGENTS.md, DESIGN.md (from awesome-design-md), direnv GCP isolation, ruflo/claude-flow config, deploy scripts, and optimized folder structure. Use when starting a new project repo.
+description: Initialize a new project with CLAUDE.md, AGENTS.md, DESIGN.md (from antidesign), direnv GCP isolation, ruflo/claude-flow config, deploy scripts, and optimized folder structure. Use when starting a new project repo.
 ---
 
 # proj-init -- Project Initialization Skill
@@ -19,10 +19,10 @@ Read ~/.claude/skills/proj-init/defaults.conf
 
 Parse the shell variables as defaults for the prompts below.
 
-Then check if the awesome-design-md repo is available:
+Then check if the antidesign repo is available:
 
 ```bash
-ls ~/Projects/awesome-design-md/design-md/ 2>/dev/null | head -5
+ls ~/Projects/antidesign/design-md/ 2>/dev/null | head -5
 ```
 
 Store whether the design repo is available (it should be). If missing, you'll fall back to the skeleton template.
@@ -73,9 +73,9 @@ Ask these 3 questions simultaneously:
 
 ### Round 3: Design System Selection
 
-**This round selects a production-grade DESIGN.md from the awesome-design-md collection.** The repo at `~/Projects/awesome-design-md/design-md/` contains 54 curated design systems from real brands. Ask two questions to narrow down the right one.
+**This round selects a production-grade DESIGN.md from the antidesign collection.** The repo at `~/Projects/antidesign/design-md/` contains 54 curated design systems from real brands. Ask two questions to narrow down the right one.
 
-If the awesome-design-md repo is NOT available, skip this round and use the skeleton template at `templates/design-md/standard.md` instead.
+If the antidesign repo is NOT available, skip this round and use the skeleton template at `templates/design-md/standard.md` instead.
 
 #### Question 1: Target market & industry (header: "Market")
 
@@ -117,12 +117,12 @@ Ask: "Which design system should we use? (Recommended based on your market + aes
 Show the 3 recommended brands as options with brief descriptions. Read the first ~5 lines of each brand's DESIGN.md to extract the visual theme description for the option preview. For example:
 
 ```
-Read ~/Projects/awesome-design-md/design-md/vercel/DESIGN.md (limit: 20 lines)
+Read ~/Projects/antidesign/design-md/vercel/DESIGN.md (limit: 20 lines)
 ```
 
 Include a 4th option: **"Blank skeleton"** -- Start with an empty DESIGN.md template to fill in manually or via `/design-consultation`.
 
-If the user picks "Other", ask them to name a specific brand from the awesome-design-md collection (list all 54 as a hint).
+If the user picks "Other", ask them to name a specific brand from the antidesign collection (list all 54 as a hint).
 
 Store the selected brand name (e.g., `vercel`, `claude`, `stripe`) or `skeleton` as the `DESIGN_SOURCE` variable.
 
@@ -154,7 +154,7 @@ From the gathered inputs, compute these template variables:
 | `{{GCP_PROJECT_ID_DEV}}` | The dev project ID (if devprod) |
 | `{{DEFAULT_PNPM_VERSION}}` | From defaults.conf |
 | `{{DEFAULT_NODE_VERSION}}` | From defaults.conf |
-| `DESIGN_SOURCE` | Brand name from awesome-design-md (e.g., `vercel`) or `skeleton` |
+| `DESIGN_SOURCE` | Brand name from antidesign (e.g., `vercel`) or `skeleton` |
 
 ## Phase 3: Show Summary & Confirm
 
@@ -166,7 +166,7 @@ Before creating anything, show a summary:
   Description:  {{PROJECT_DESCRIPTION}}
   Directory:    ~/Projects/{{PROJECT_NAME}}
   Type:         <type>
-  Design:       <brand name> (from awesome-design-md) | blank skeleton
+  Design:       <brand name> (from antidesign) | blank skeleton
   GCP Config:   {{GCP_CONFIG_NAME}}
   GCP Account:  {{GCP_ACCOUNT_EMAIL}}
   GCP Project:  {{GCP_PROJECT_ID}}
@@ -230,23 +230,23 @@ For **cloud-functions** type, also create:
     - 'web'
   ```
 
-### 4.3 Write DESIGN.md (from awesome-design-md or skeleton)
+### 4.3 Write DESIGN.md (from antidesign or skeleton)
 
 This step is separate because it has two sources:
 
 **If `DESIGN_SOURCE` is a brand name** (not `skeleton`):
 
-1. Read the full DESIGN.md from the awesome-design-md repo:
+1. Read the full DESIGN.md from the antidesign repo:
    ```
-   Read ~/Projects/awesome-design-md/design-md/<DESIGN_SOURCE>/DESIGN.md
+   Read ~/Projects/antidesign/design-md/<DESIGN_SOURCE>/DESIGN.md
    ```
 
 2. Write the contents directly to `{{PROJECT_DIR}}/DESIGN.md`. Do NOT modify the content -- these are curated design systems meant to be used as-is.
 
 3. Add a header comment at the very top (before the existing content):
    ```markdown
-   <!-- Design system sourced from awesome-design-md/<DESIGN_SOURCE> -->
-   <!-- See: ~/Projects/awesome-design-md/design-md/<DESIGN_SOURCE>/ for preview HTML -->
+   <!-- Design system sourced from antidesign/<DESIGN_SOURCE> -->
+   <!-- See: ~/Projects/antidesign/design-md/<DESIGN_SOURCE>/ for preview HTML -->
 
    ```
 
@@ -330,8 +330,8 @@ Files:
   [+ plugin files if any]
 
 Design:
-  Source: awesome-design-md/<brand> (or skeleton)
-  Preview: ~/Projects/awesome-design-md/design-md/<brand>/preview.html
+  Source: antidesign/<brand> (or skeleton)
+  Preview: ~/Projects/antidesign/design-md/<brand>/preview.html
 
 GCP:
   Config: {{GCP_CONFIG_NAME}} -> {{GCP_PROJECT_ID}} ({{GCP_REGION}})
@@ -355,14 +355,14 @@ Next steps:
 - **Never overwrite existing files.** Check before every write. Skip with a warning if the file exists.
 - **Always read templates from the skill directory.** Do not hardcode template content.
 - **Replace ALL {{PLACEHOLDER}} variables** before writing. Verify no unreplaced placeholders remain.
-- **Do NOT modify awesome-design-md DESIGN.md content** -- copy it verbatim (with the source comment header).
+- **Do NOT modify antidesign DESIGN.md content** -- copy it verbatim (with the source comment header).
 - **Pad the CLAUDE.md table row** to match existing column widths.
 - The `.envrc` file should NOT be committed to git (it's in .gitignore). But it IS created in the working directory.
 - The `.claude/` directory should NOT be committed to git (it's in .gitignore).
 
 ## Design Recommendation Reference
 
-Full list of available design systems in `~/Projects/awesome-design-md/design-md/`:
+Full list of available design systems in `~/Projects/antidesign/design-md/`:
 
 ### AI & Machine Learning
 `claude`, `cohere`, `elevenlabs`, `minimax`, `mistral.ai`, `ollama`, `opencode.ai`, `replicate`, `runwayml`, `together.ai`, `voltagent`, `x.ai`
