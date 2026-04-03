@@ -1,0 +1,9 @@
+apps/web/src/app
+apps/web/src/components
+apps/web/src/lib
+apps/api-service/src/routes
+apps/api-service/src/lib
+packages/core/src
+scripts/deploy
+scripts/gcp
+docs

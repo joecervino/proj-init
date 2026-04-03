@@ -1,0 +1,6 @@
+src/routes
+src/lib
+src/types
+src/test
+scripts/lib
+docs

@@ -1,0 +1,65 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.*
+.pnpm-store/
+
+# Build output
+.next/
+out/
+build/
+dist/
+coverage/
+.swc/
+*.tsbuildinfo
+
+# Environment and secrets
+.env
+.env.*
+!.env.example
+*.pem
+.secret*
+
+# Debug logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# OS files
+.DS_Store
+
+# Editor
+.idea/
+.vscode/*
+!.vscode/extensions.json
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Cloud Functions
+functions/lib/
+functions/node_modules/
+
+# Firebase
+.firebase/
+firebase-debug.log*
+firestore-debug.log*
+ui-debug.log*
+
+# direnv
+.envrc
+
+# GCP
+.gcloudignore
+
+# Claude Code local state
+.claude/
+
+# gstack
+.gstack/
+
+# Generated
+next-env.d.ts
