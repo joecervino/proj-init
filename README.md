@@ -1,8 +1,13 @@
 # proj-init
 
-A Claude Code skill that initializes new project repositories with standardized configuration, GCP isolation, and optimized folder structures.
+A Claude Code skill that initializes new projects or augments existing repos with standardized configuration, GCP isolation, and optimized folder structures.
 
-## What it creates
+## Two modes
+
+- **New project** -- Creates a fresh repo from scratch with all config files
+- **Augment existing repo** -- Scans an existing project, adds missing files, and intelligently merges improvements into existing ones (e.g., appending .gitignore entries, adding missing package.json scripts, merging MCP servers)
+
+## What it creates / adds
 
 - **CLAUDE.md** -- Project-specific instructions for Claude Code agents
 - **AGENTS.md** -- Coding standards, commands, and conventions
