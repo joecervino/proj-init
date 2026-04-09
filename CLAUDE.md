@@ -11,7 +11,7 @@ A self-contained skill directory. Clone to `~/.claude/skills/proj-init/` and inv
 - `proj-init.md` -- Skill definition (the brain)
 - `defaults.conf` -- User defaults for prompts
 - `templates/` -- All file templates, organized by type
-- `plugins/` -- Optional add-on modules (docker, CI, etc.)
+- `plugins/` -- Optional add-on modules (graphify, caveman, docker, CI, etc.)
 
 ## Templates
 

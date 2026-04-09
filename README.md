@@ -54,4 +54,6 @@ cd ~/.claude/skills/proj-init && git pull
 
 ## Plugins
 
-Optional add-ons: `docker`, `ci-github-actions`, `ci-cloud-build`. Add your own by dropping a `.md` file in `plugins/`.
+Built-in add-ons: `graphify`, `caveman`, `docker`, `ci-github-actions`, `ci-cloud-build`.
+
+`graphify` and `caveman` are selected by default for new projects. Add your own by dropping a `.md` file in `plugins/`.

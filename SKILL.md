@@ -205,10 +205,18 @@ Show top 3 + "Blank skeleton" option. Read first ~20 lines of each brand's DESIG
 
 ### Round 4: Plugins (optional, both modes)
 
+In new project mode, auto-discover available plugins from `plugins/*.md`.
+
+For new projects, pre-select `graphify` and `caveman` by default. Also pre-select any plugin names listed in `DEFAULT_PLUGINS` from `defaults.conf`.
+
+Show a multi-select list of available plugins so the user can remove defaults or add others.
+
 In augment mode, auto-detect existing plugins:
 - If `.github/workflows/ci.yml` exists, pre-select ci-github-actions as "already present"
 - If `cloudbuild.yaml` exists, pre-select ci-cloud-build as "already present"
 - If `Dockerfile` exists, pre-select docker as "already present"
+- If `.graphifyignore` exists, or `graphify-out/` exists, or `AGENTS.md` mentions `graphify`, pre-select graphify as "already present"
+- If `AGENTS.md` mentions `caveman`, pre-select caveman as "already present"
 
 Only show plugins that are NOT already present.
 
