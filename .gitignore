@@ -1,0 +1,25 @@
+# OS files
+.DS_Store
+
+# Editor
+.idea/
+.vscode/*
+!.vscode/extensions.json
+*.sw?
+
+# Environment and secrets
+.env
+.env.*
+!.env.example
+*.pem
+.secret*
+
+# direnv
+.envrc
+
+# Claude Code local state
+.claude/
+.claude-flow/
+
+# gstack
+.gstack/

@@ -63,3 +63,8 @@ ui-debug.log*
 
 # Generated
 next-env.d.ts
+
+# Local devcontainer auth state (repo-local only)
+.devcontainer/.state/
+.devcontainer/.auth/
+.devcontainer/.secrets/

@@ -1,0 +1,4 @@
+# Local devcontainer auth state (repo-local only)
+.devcontainer/.state/
+.devcontainer/.auth/
+.devcontainer/.secrets/

@@ -1,0 +1,29 @@
+{
+  "name": "{{PROJECT_NAME}} Dev Container",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "context": ".."
+  },
+  "remoteEnv": {
+    "CLOUDSDK_CONFIG": "${containerWorkspaceFolder}/.devcontainer/.state/gcloud"
+  },
+  "postCreateCommand": "bash .devcontainer/post-create.sh",
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "terminal.integrated.defaultProfile.linux": "bash"
+      },
+      "extensions": "{{DEVCONTAINER_EXTENSIONS_JSON}}"
+    }
+  },
+  "mounts": [
+    "source=${localEnv:HOME}/.claude/skills,target=/home/node/.claude/skills,type=bind,readonly",
+    "source=${localEnv:HOME}/.claude/plugins,target=/home/node/.claude/plugins,type=bind,readonly",
+    "source=${localEnv:HOME}/.codex/skills,target=/home/node/.codex/skills,type=bind,readonly",
+    "source=${localEnv:HOME}/.codex/plugins,target=/home/node/.codex/plugins,type=bind,readonly",
+    "source=${localEnv:HOME}/.agents/skills,target=/home/node/.agents/skills,type=bind,readonly",
+    "source=${localEnv:HOME}/Projects/.agents/skills,target=/home/node/Projects/.agents/skills,type=bind,readonly",
+    "source=${localWorkspaceFolderBasename}-node_modules,target=${containerWorkspaceFolder}/node_modules,type=volume",
+    "source=${localWorkspaceFolderBasename}-pnpm-store,target=/home/node/.pnpm-store,type=volume"
+  ]
+}

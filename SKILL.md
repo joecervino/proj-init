@@ -1,6 +1,6 @@
 ---
 name: proj-init
-description: Initialize a new project or augment an existing repo with CLAUDE.md, AGENTS.md, DESIGN.md (from antidesign), direnv GCP isolation, ruflo/claude-flow config, deploy scripts, and optimized folder structure. Use when starting a new project repo or adding standard config to an existing one.
+description: Initialize a new project or augment an existing repo with CLAUDE.md, AGENTS.md, DESIGN.md (from antidesign), direnv GCP isolation, devcontainer-local GCP auth isolation, ruflo/claude-flow config, deploy scripts, and optimized folder structure. Use when starting a new project repo or adding standard config to an existing one.
 ---
 
 # proj-init -- Project Initialization Skill
@@ -34,7 +34,10 @@ Determine whether this is a **new project** or an **existing repo augmentation**
 Check the current working directory for existing project signals:
 
 ```bash
-ls package.json .git CLAUDE.md AGENTS.md .envrc .mcp.json tsconfig.json 2>/dev/null
+ls package.json .git CLAUDE.md AGENTS.md .envrc .mcp.json tsconfig.json \
+  .devcontainer/devcontainer.json .devcontainer/post-create.sh \
+  scripts/dev-auth-bootstrap.sh scripts/dev-auth-ensure-sa.sh scripts/dev-auth-doctor.sh scripts/dev-auth-reset.sh \
+  docs/local-dev-gcp.md 2>/dev/null
 ```
 
 Also check if the user explicitly named a directory:
@@ -60,7 +63,11 @@ Scan the current project directory to understand what already exists. Read and c
 
 ```bash
 # What exists?
-ls -la package.json CLAUDE.md AGENTS.md DESIGN.md .envrc .env.example .mcp.json .gitignore tsconfig.json vitest.config.ts scripts/deploy.sh scripts/lib/common.sh .claude/settings.local.json 2>/dev/null
+ls -la package.json CLAUDE.md AGENTS.md DESIGN.md .envrc .env.example .mcp.json .gitignore \
+  tsconfig.json vitest.config.ts scripts/deploy.sh scripts/lib/common.sh \
+  .devcontainer/devcontainer.json .devcontainer/post-create.sh \
+  scripts/dev-auth-bootstrap.sh scripts/dev-auth-ensure-sa.sh scripts/dev-auth-doctor.sh scripts/dev-auth-reset.sh \
+  docs/local-dev-gcp.md .claude/settings.local.json 2>/dev/null
 ```
 
 Build an **audit table** of every managed file:
@@ -80,6 +87,13 @@ Build an **audit table** of every managed file:
 | `vitest.config.ts` | exists / missing | |
 | `scripts/deploy.sh` | exists / missing | |
 | `scripts/lib/common.sh` | exists / missing | |
+| `.devcontainer/devcontainer.json` | exists / missing | Merge if exists; ensure repo-local `CLOUDSDK_CONFIG` |
+| `.devcontainer/post-create.sh` | exists / missing | Initializes repo-local auth directories |
+| `scripts/dev-auth-bootstrap.sh` | exists / missing | Auth bootstrap helper (impersonation -> WIF -> key) |
+| `scripts/dev-auth-ensure-sa.sh` | exists / missing | One-time IAM prep helper for local impersonation |
+| `scripts/dev-auth-doctor.sh` | exists / missing | CLI + ADC diagnostics |
+| `scripts/dev-auth-reset.sh` | exists / missing | Repo-local auth cleanup |
+| `docs/local-dev-gcp.md` | exists / missing | Local devcontainer + auth setup doc |
 
 **Auto-detect from existing files:**
 - `PROJECT_NAME`: from `package.json` `name` field, or directory basename
@@ -154,7 +168,7 @@ Only ask for values that couldn't be auto-detected. Pre-fill detected values as 
 
 ### Round 2: Type & Options (both modes)
 
-For new projects, ask all 3 questions. For augment, only ask what's unresolved:
+For new projects, ask all 4 questions. For augment, only ask what's unresolved:
 
 1. **Project type** (header: "Type") -- skip if auto-detected and confirmed
    - Options: nextjs, monorepo, cloud-functions, api-only, minimal
@@ -165,6 +179,20 @@ For new projects, ask all 3 questions. For augment, only ask what's unresolved:
 
 3. **Dev/prod environment switching?** (header: "Dev/Prod") -- skip if .envrc already has conditional logic
    - Options: No (single environment), Yes (creates dev config + conditional .envrc)
+
+4. **Extension bundles** (header: "Extensions")
+   - Multi-select options: gcp, aws, terraform, jupyter, mermaid, n8n, neon, figma
+   - New mode default: pre-select `gcp`
+   - Augment mode default: pre-select detected bundles from existing repo signals, then allow override
+   - Detection hints for augment mode:
+     - `gcp`: `.envrc` has GCP vars, or existing devcontainer already has `googlecloudtools.cloudcode` / `google.geminicodeassist`
+     - `aws`: existing devcontainer has AWS Toolkit / Amazon Q extensions
+     - `terraform`: repo has `*.tf` or `*.tfvars` files, or existing devcontainer has `hashicorp.terraform`
+     - `jupyter`: existing devcontainer has Python/Jupyter extension IDs
+     - `mermaid`: existing devcontainer has `mermaidchart.vscode-mermaid-chart`
+     - `n8n`: existing devcontainer has `ivov.n8n-utils` or `thorclient.n8n-atom-vscode`
+     - `neon`: existing devcontainer has `databricks.neon-local-connect`
+     - `figma`: existing devcontainer has `figma.figma-vscode-extension`
 
 ### Round 3: Design System Selection (both modes)
 
@@ -238,8 +266,63 @@ Same as before -- compute all template variables from gathered inputs.
 | `{{GCP_PROJECT_ID_DEV}}` | The dev project ID (if devprod) |
 | `{{DEFAULT_PNPM_VERSION}}` | From defaults.conf |
 | `{{DEFAULT_NODE_VERSION}}` | From defaults.conf |
+| `{{EXTENSION_BUNDLES}}` | Comma-separated selected bundle names |
+| `{{DEVCONTAINER_EXTENSIONS_JSON}}` | JSON array for `.devcontainer/devcontainer.json` `extensions` |
 | `DESIGN_SOURCE` | Brand name from antidesign (e.g., `vercel`) or `skeleton` |
 | `MODE` | `new` or `augment` |
+
+### Extension Bundle Resolution
+
+Use this as the single source of truth for devcontainer extension selection.
+
+Baseline extensions (always include):
+
+- `aaron-bond.better-comments`
+- `anthropic.claude-code`
+- `bengreenier.vscode-node-readme`
+- `christian-kohler.path-intellisense`
+- `dbaeumer.vscode-eslint`
+- `eamodio.gitlens`
+- `emmanuelbeziat.vscode-great-icons`
+- `esbenp.prettier-vscode`
+- `formulahendry.auto-rename-tag`
+- `github.copilot-chat`
+- `mattpocock.ts-error-translator`
+- `mgmcdermott.vscode-language-babel`
+- `openai.chatgpt`
+- `redhat.vscode-yaml`
+- `sdras.night-owl`
+- `wix.vscode-import-cost`
+- `xabikos.reactsnippets`
+
+Permanently remove/exclude:
+
+- `streetsidesoftware.code-spell-checker`
+- `anseki.vscode-color`
+- `naumovs.color-highlight`
+- `xabikos.javascriptsnippets`
+- `wallabyjs.quokka-vscode`
+- `sketchbuch.vsc-quokka-statusbar`
+- `mrmlnc.vscode-scss`
+- `bradlc.vscode-tailwindcss`
+
+Managed bundles:
+
+- `aws`: `amazonwebservices.amazon-q-vscode`, `amazonwebservices.aws-toolkit-vscode`
+- `gcp`: `googlecloudtools.cloudcode`, `google.geminicodeassist`
+- `terraform`: `hashicorp.terraform`
+- `jupyter`: `ms-python.debugpy`, `ms-python.python`, `ms-python.vscode-pylance`, `ms-python.vscode-python-envs`, `ms-toolsai.jupyter`, `ms-toolsai.jupyter-keymap`, `ms-toolsai.jupyter-renderers`, `ms-toolsai.vscode-jupyter-cell-tags`, `ms-toolsai.vscode-jupyter-slideshow`
+- `mermaid`: `mermaidchart.vscode-mermaid-chart`
+- `n8n`: `ivov.n8n-utils`, `thorclient.n8n-atom-vscode`
+- `neon`: `databricks.neon-local-connect`
+- `figma`: `figma.figma-vscode-extension`
+
+Compute `{{DEVCONTAINER_EXTENSIONS_JSON}}` as:
+
+1. Start from the baseline list.
+2. Add extension IDs from selected bundles.
+3. Remove any permanently excluded IDs.
+4. De-duplicate while preserving first occurrence order.
 
 ## Phase 3: Show Summary & Confirm
 
@@ -257,6 +340,8 @@ Same as before -- compute all template variables from gathered inputs.
     .gitignore -- add 8 missing entries (direnv, claude, gstack sections)
     package.json -- add 3 missing scripts (typecheck, ci, test:coverage)
     .mcp.json -- add claude-flow server (preserving existing servers)
+    .devcontainer/devcontainer.json -- ensure repo-local CLOUDSDK_CONFIG + post-create
+    .env.example -- ensure non-secret local auth placeholders
 
   SKIP (already good):
     tsconfig.json, vitest.config.ts, ...
@@ -264,6 +349,8 @@ Same as before -- compute all template variables from gathered inputs.
   GCP:
     Config: <status>
     Root CLAUDE.md: <will update / already listed>
+  Extensions:
+    Bundles: <selected bundles>
 ```
 
 Ask user to confirm.
@@ -295,9 +382,59 @@ Read the scaffold file. Only `mkdir -p` directories that don't already exist. Ne
 4. Append any missing entries, grouped under a `# Added by proj-init` comment
 5. Never remove existing entries
 
+##### `.devcontainer/devcontainer.json` -- CREATE if missing, MERGE if exists
+- If missing: create from `templates/devcontainer/devcontainer.json`.
+- If missing, replace the string token `"{{DEVCONTAINER_EXTENSIONS_JSON}}"` with the computed JSON array literal.
+- If exists: preserve existing image/features/customizations and merge in:
+  - `remoteEnv.CLOUDSDK_CONFIG=${containerWorkspaceFolder}/.devcontainer/.state/gcloud`
+  - `postCreateCommand=bash .devcontainer/post-create.sh` (append to existing command if needed)
+- Required skills/plugins mounts (always-on, read-only):
+  - `source=${localWorkspaceFolderBasename}-node_modules,target=${containerWorkspaceFolder}/node_modules,type=volume`
+  - `source=${localWorkspaceFolderBasename}-pnpm-store,target=/home/node/.pnpm-store,type=volume`
+  - `source=${localEnv:HOME}/.claude/skills,target=/home/node/.claude/skills,type=bind,readonly`
+  - `source=${localEnv:HOME}/.claude/plugins,target=/home/node/.claude/plugins,type=bind,readonly`
+  - `source=${localEnv:HOME}/.codex/skills,target=/home/node/.codex/skills,type=bind,readonly`
+  - `source=${localEnv:HOME}/.codex/plugins,target=/home/node/.codex/plugins,type=bind,readonly`
+  - `source=${localEnv:HOME}/.agents/skills,target=/home/node/.agents/skills,type=bind,readonly`
+  - `source=${localEnv:HOME}/Projects/.agents/skills,target=/home/node/Projects/.agents/skills,type=bind,readonly`
+- For `customizations.vscode.extensions` merge behavior:
+  - Preserve unknown/non-managed extension IDs already in the repo.
+  - Remove all permanently excluded extension IDs.
+  - Add extension IDs for selected managed bundles.
+  - Remove extension IDs for unselected managed bundles.
+  - De-duplicate while preserving stable order.
+- For `mounts` merge behavior:
+  - If `mounts` is missing, create it with the required mounts.
+  - If `mounts` exists, append any missing required mounts.
+  - Never remove unrelated existing mounts.
+- Never remove existing repo-specific devcontainer behavior.
+
+##### `.devcontainer/post-create.sh` -- CREATE if missing, PRESERVE if exists
+- If missing: create from `templates/devcontainer/post-create.sh`.
+- If exists: preserve existing logic, and ensure it also:
+  - initializes repo-local auth directories under `.devcontainer/.state`, `.devcontainer/.auth`, `.devcontainer/.secrets`
+  - detects pnpm repos (`package.json` + `pnpm-lock.yaml`)
+  - verifies `node_modules` is writable and repairs ownership when needed
+  - uses `/home/node/.pnpm-store` as primary store
+  - repairs unwritable primary store with `sudo chown -R "$(id -u):$(id -g)" /home/node/.pnpm-store` when possible
+  - falls back to `.devcontainer/.state/pnpm-store` when primary store remains unwritable
+  - retries `pnpm install` once with reduced concurrency when install is killed (exit 137)
+  - runs `pnpm install --no-frozen-lockfile` in-container using the selected writable store
+  - fails fast with explicit remediation guidance if `node_modules` remains unwritable
+  - emits clear logs for dependency bootstrap and selected store path
+
 ##### `.envrc` -- CREATE if missing, SKIP if exists
 - If missing: create from template
 - If exists: read it, verify GCP vars are set. If GCP vars are missing, offer to add them. Never overwrite existing .envrc logic.
+
+##### `.env.example` -- APPEND local auth placeholders
+- Ensure these non-secret keys exist (append if missing):
+  - `GCP_DEV_ME_USER_EMAIL=`
+  - `GCP_DEV_SA_ID=local-dev-codex`
+  - `GCP_DEV_IMPERSONATE_SERVICE_ACCOUNT=`
+  - `GCP_DEV_WIF_CREDENTIAL_FILE=`
+  - `GCP_DEV_CREDENTIAL_FILE=`
+- Never add secret values.
 
 ##### `CLAUDE.md` -- SMART MERGE
 1. Read the existing CLAUDE.md
@@ -342,6 +479,51 @@ Read the scaffold file. Only `mkdir -p` directories that don't already exist. Ne
 - If exists: read it and verify it has a project guard (`EXPECTED_PROJECT=`). If not, warn the user that the deploy script lacks a project guard but do NOT modify it.
 
 ##### `scripts/lib/common.sh` -- CREATE if missing, SKIP if exists
+
+##### `scripts/dev-auth-bootstrap.sh` -- CREATE if missing, CHECK if exists
+- If missing: create from `templates/scripts/dev-auth-bootstrap.sh`.
+- If exists: preserve repo-specific custom logic, but ensure it supports:
+  - default impersonation mode
+  - wif fallback mode
+  - key fallback mode
+  - fail-fast validation for impersonation service account format (`*.iam.gserviceaccount.com`)
+  - actionable hints for impersonation misconfiguration (project mismatch / Gaia id not found)
+  - repo-local `CLOUDSDK_CONFIG` under `.devcontainer/.state/gcloud`
+
+##### `scripts/dev-auth-ensure-sa.sh` -- CREATE if missing, CHECK if exists
+- If missing: create from `templates/scripts/dev-auth-ensure-sa.sh`.
+- If exists: preserve repo-specific custom logic, but ensure it supports:
+  - `--project`, `--me`, `--sa-id`, `--region`, repeatable `--sa-role`, `--dry-run`
+  - clearing stale impersonation config before IAM operations
+  - idempotent SA creation
+  - TokenCreator grant for `user:<me>` on the target service account
+  - optional project role grants to `serviceAccount:<sa>`
+  - admin handoff command block on IAM permission failures
+  - printing an exact follow-up `dev-auth-bootstrap.sh impersonation ...` command
+
+##### `scripts/dev-auth-doctor.sh` -- CREATE if missing, CHECK if exists
+- If missing: create from `templates/scripts/dev-auth-doctor.sh`.
+- If exists: ensure it validates both CLI auth and ADC auth independently.
+
+##### `scripts/dev-auth-reset.sh` -- CREATE if missing, CHECK if exists
+- If missing: create from `templates/scripts/dev-auth-reset.sh`.
+- If exists: ensure it only clears repo-local auth state.
+
+##### `docs/local-dev-gcp.md` -- CREATE if missing, REFRESH hints if exists
+- If missing: create from `templates/docs/local-dev-gcp.md`.
+- If exists: preserve project-specific detail, but ensure it documents:
+  - dependency-isolated Node setup (`node_modules` and pnpm store volumes)
+  - why mount options do not reliably set uid/gid for these named volumes in this setup
+  - self-healing behavior for both `node_modules` and pnpm store (ownership repair + fallback store)
+  - retry behavior and manual command when install is killed by memory pressure (exit 137)
+  - one-time cleanup commands for stale host `node_modules` when migrating existing repos
+  - quick verification commands for writable `node_modules`, writable pnpm store, and Linux-native modules (esbuild check)
+  - note that `Command "tsx" not found` usually means install/linking was interrupted
+  - one-time IAM setup with `dev-auth-ensure-sa.sh`
+  - how to reopen in devcontainer
+  - first-time auth bootstrap
+  - doctor checks for CLI + ADC
+  - reset behavior and manual IAM prerequisites
 
 #### 4.3 Write DESIGN.md (same logic as new mode, but respects existing)
 
@@ -428,6 +610,10 @@ Next steps:
 - **Pad the CLAUDE.md table row** to match existing column widths.
 - The `.envrc` file should NOT be committed to git (it's in .gitignore). But it IS created in the working directory.
 - The `.claude/` directory should NOT be committed to git (it's in .gitignore).
+- Ensure `.gitignore` includes repo-local dev auth paths:
+  - `.devcontainer/.state/`
+  - `.devcontainer/.auth/`
+  - `.devcontainer/.secrets/`
 
 ## Design Recommendation Reference
 
